@@ -1,0 +1,294 @@
+openapi: 3.1.0
+info:
+  title: CS2 Trade-Up Solver Public API
+  version: 0.1.0
+  description: Public contract for asynchronous near-real-time CS2 trade-up solving.
+servers:
+  - url: https://api.example.invalid
+    description: Placeholder; the hosted endpoint is not public yet.
+security: []
+paths:
+  /v1/collections:
+    get:
+      operationId: getCollections
+      summary: List selectable Collections
+      responses:
+        "200":
+          description: Current server-controlled Collection catalog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CollectionCatalogResponse"
+  /v1/service-status:
+    get:
+      operationId: getServiceStatus
+      summary: Get coarse public service status
+      responses:
+        "200":
+          description: Service availability and bounded queue state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceStatusResponse"
+  /v1/solve:
+    post:
+      operationId: submitSolve
+      summary: Submit an asynchronous solve request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolveRequest"
+      responses:
+        "202":
+          description: Solve request accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SolveAcceptedResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: Maintenance mode; new jobs are not accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limit or bounded queue limit reached
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Public solving is temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/jobs/{job_id}:
+    get:
+      operationId: getJob
+      summary: Get asynchronous job state or completed result
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 16
+            maxLength: 128
+            pattern: "^[A-Za-z0-9_-]+$"
+      responses:
+        "200":
+          description: Current job state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobResponse"
+        "404":
+          description: Unknown or expired job identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  responses:
+    BadRequest:
+      description: Request schema or Collection selection is invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    Collection:
+      type: object
+      additionalProperties: false
+      required: [id, display_name]
+      properties:
+        id: { type: string, minLength: 1, maxLength: 128 }
+        display_name: { type: string, minLength: 1, maxLength: 200 }
+    CollectionCatalogResponse:
+      type: object
+      additionalProperties: false
+      required: [collections, catalog_version]
+      properties:
+        catalog_version: { type: string }
+        collections:
+          type: array
+          items: { $ref: "#/components/schemas/Collection" }
+    ServiceStatusResponse:
+      type: object
+      additionalProperties: false
+      required: [availability, accepting_jobs, active_solves, max_active_solves, queue_depth, max_queued_solves, updated_at]
+      properties:
+        availability:
+          type: string
+          enum: [AVAILABLE, MAINTENANCE, UNAVAILABLE]
+        accepting_jobs: { type: boolean }
+        active_solves: { type: integer, minimum: 0 }
+        max_active_solves: { type: integer, minimum: 1 }
+        queue_depth: { type: integer, minimum: 0 }
+        max_queued_solves: { type: integer, minimum: 1 }
+        maintenance_message: { type: [string, "null"], maxLength: 500 }
+        updated_at: { type: string, format: date-time }
+    SolveRequest:
+      oneOf:
+        - $ref: "#/components/schemas/SingleSolveRequest"
+        - $ref: "#/components/schemas/DualSolveRequest"
+      discriminator:
+        propertyName: mode
+    SingleSolveRequest:
+      type: object
+      additionalProperties: false
+      required: [mode, collection_a, collection_b]
+      properties:
+        mode: { const: single }
+        collection_a: { type: string, minLength: 1, maxLength: 128 }
+        collection_b: { type: "null" }
+    DualSolveRequest:
+      type: object
+      additionalProperties: false
+      required: [mode, collection_a, collection_b]
+      properties:
+        mode: { const: dual }
+        collection_a: { type: string, minLength: 1, maxLength: 128 }
+        collection_b: { type: string, minLength: 1, maxLength: 128 }
+      description: collection_a and collection_b must be distinct; enforced by the server after schema validation.
+    SolveAcceptedResponse:
+      type: object
+      additionalProperties: false
+      required: [job_id, status, submitted_at]
+      properties:
+        job_id: { type: string, minLength: 16, maxLength: 128 }
+        status: { const: QUEUED }
+        submitted_at: { type: string, format: date-time }
+        queue_position: { type: [integer, "null"], minimum: 1 }
+    JobProgress:
+      type: object
+      additionalProperties: false
+      required: [structures_completed, structures_total]
+      properties:
+        structures_completed: { type: integer, minimum: 0 }
+        structures_total: { type: integer, minimum: 0 }
+    CollectionCount:
+      type: object
+      additionalProperties: false
+      required: [collection_id, display_name, count]
+      properties:
+        collection_id: { type: string }
+        display_name: { type: string }
+        count: { type: integer, minimum: 1, maximum: 10 }
+    BasketInput:
+      type: object
+      additionalProperties: false
+      required: [listing_id, market_hash_name, collection_id, collection_name, wear, float_value, price_cny]
+      properties:
+        listing_id: { type: string }
+        market_hash_name: { type: string }
+        collection_id: { type: string }
+        collection_name: { type: string }
+        wear: { type: string }
+        float_value: { type: number, minimum: 0, maximum: 1 }
+        price_cny: { type: number, exclusiveMinimum: 0 }
+    Economics:
+      type: object
+      additionalProperties: false
+      required: [cost_cny, expected_value_cny, expected_profit_cny, roi]
+      properties:
+        cost_cny: { type: [number, "null"] }
+        expected_value_cny: { type: [number, "null"] }
+        expected_profit_cny: { type: [number, "null"] }
+        roi: { type: [number, "null"] }
+    StructureResult:
+      type: object
+      additionalProperties: false
+      required: [structure_id, structure_label, required_collection_counts, status, economics, basket]
+      properties:
+        structure_id: { type: string }
+        structure_label: { type: string }
+        required_collection_counts:
+          type: array
+          minItems: 1
+          maxItems: 2
+          items: { $ref: "#/components/schemas/CollectionCount" }
+        status:
+          type: string
+          enum: [OPTIMAL, INFEASIBLE, TIMEOUT, ERROR]
+        economics: { $ref: "#/components/schemas/Economics" }
+        basket:
+          oneOf:
+            - type: array
+              minItems: 10
+              maxItems: 10
+              items: { $ref: "#/components/schemas/BasketInput" }
+            - type: "null"
+        runtime_seconds: { type: [number, "null"], minimum: 0 }
+        reason: { type: [string, "null"], maxLength: 500 }
+    SolveResult:
+      type: object
+      additionalProperties: false
+      required: [mode, collection_a, collection_b, market_snapshot_at, solver_version, result_version, structures]
+      properties:
+        mode:
+          type: string
+          enum: [single, dual]
+        collection_a: { $ref: "#/components/schemas/Collection" }
+        collection_b:
+          oneOf:
+            - $ref: "#/components/schemas/Collection"
+            - type: "null"
+        market_snapshot_at: { type: string, format: date-time }
+        solver_version: { type: string }
+        result_version: { type: string }
+        structures:
+          type: array
+          items: { $ref: "#/components/schemas/StructureResult" }
+    JobResponse:
+      type: object
+      additionalProperties: false
+      required: [job_id, status, submitted_at, started_at, completed_at, queue_position, progress, elapsed_seconds, result, error]
+      properties:
+        job_id: { type: string, minLength: 16, maxLength: 128 }
+        status:
+          type: string
+          enum: [QUEUED, RUNNING, COMPLETED, FAILED]
+        submitted_at: { type: string, format: date-time }
+        started_at: { type: [string, "null"], format: date-time }
+        completed_at: { type: [string, "null"], format: date-time }
+        queue_position: { type: [integer, "null"], minimum: 1 }
+        progress:
+          oneOf:
+            - $ref: "#/components/schemas/JobProgress"
+            - type: "null"
+        elapsed_seconds: { type: [number, "null"], minimum: 0 }
+        result:
+          oneOf:
+            - $ref: "#/components/schemas/SolveResult"
+            - type: "null"
+        error:
+          oneOf:
+            - $ref: "#/components/schemas/PublicJobError"
+            - type: "null"
+    PublicJobError:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [SOLVE_FAILED, SOLVE_TIMEOUT, SERVICE_RESTARTED]
+        message: { type: string, maxLength: 500 }
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string, maxLength: 500 }

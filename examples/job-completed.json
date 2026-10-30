@@ -1,0 +1,105 @@
+{
+  "job_id": "job_sample_01HYYYYYYYYYYYYYYYYYYYYY",
+  "status": "COMPLETED",
+  "submitted_at": "2026-10-30T10:58:00Z",
+  "started_at": "2026-10-30T10:58:02Z",
+  "completed_at": "2026-10-30T10:59:01Z",
+  "queue_position": null,
+  "progress": {"structures_completed": 4, "structures_total": 4},
+  "elapsed_seconds": 59.0,
+  "result": {
+    "mode": "dual",
+    "collection_a": {"id": "sample-alpha", "display_name": "Sample Collection Alpha"},
+    "collection_b": {"id": "sample-beta", "display_name": "Sample Collection Beta"},
+    "market_snapshot_at": "2026-10-30T10:57:45Z",
+    "solver_version": "sample-solver-v1",
+    "result_version": "sample-result-v1",
+    "structures": [
+      {
+        "structure_id": "sample-structure-8-2",
+        "structure_label": "8 Alpha + 2 Beta",
+        "required_collection_counts": [
+          {"collection_id": "sample-alpha", "display_name": "Sample Collection Alpha", "count": 8},
+          {"collection_id": "sample-beta", "display_name": "Sample Collection Beta", "count": 2}
+        ],
+        "status": "OPTIMAL",
+        "economics": {"cost_cny": 55.65, "expected_value_cny": 62.4, "expected_profit_cny": 6.75, "roi": 0.1213},
+        "basket": [
+          {"listing_id":"positive-listing-01","market_hash_name":"Sample Skin A (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.2,"price_cny":4.9},
+          {"listing_id":"positive-listing-02","market_hash_name":"Sample Skin B (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.2031,"price_cny":5.27},
+          {"listing_id":"positive-listing-03","market_hash_name":"Sample Skin C (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.2062,"price_cny":5.64},
+          {"listing_id":"positive-listing-04","market_hash_name":"Sample Skin D (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.2093,"price_cny":6.01},
+          {"listing_id":"positive-listing-05","market_hash_name":"Sample Skin E (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.2124,"price_cny":6.38},
+          {"listing_id":"positive-listing-06","market_hash_name":"Sample Skin F (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.2155,"price_cny":6.75},
+          {"listing_id":"positive-listing-07","market_hash_name":"Sample Skin G (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.2186,"price_cny":7.12},
+          {"listing_id":"positive-listing-08","market_hash_name":"Sample Skin H (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.2217,"price_cny":7.49},
+          {"listing_id":"positive-listing-09","market_hash_name":"Sample Skin I (Field-Tested)","collection_id":"sample-beta","collection_name":"Sample Collection Beta","wear":"Field-Tested","float_value":0.2248,"price_cny":7.86},
+          {"listing_id":"positive-listing-10","market_hash_name":"Sample Skin J (Field-Tested)","collection_id":"sample-beta","collection_name":"Sample Collection Beta","wear":"Field-Tested","float_value":0.2279,"price_cny":8.23}
+        ],
+        "runtime_seconds": 0.62,
+        "reason": null
+      },
+      {
+        "structure_id": "sample-structure-6-4",
+        "structure_label": "6 Alpha + 4 Beta",
+        "required_collection_counts": [
+          {"collection_id": "sample-alpha", "display_name": "Sample Collection Alpha", "count": 6},
+          {"collection_id": "sample-beta", "display_name": "Sample Collection Beta", "count": 4}
+        ],
+        "status": "OPTIMAL",
+        "economics": {"cost_cny": 71.65, "expected_value_cny": 67.1, "expected_profit_cny": -4.55, "roi": -0.0635},
+        "basket": [
+          {"listing_id":"negative-listing-01","market_hash_name":"Sample Skin K (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.201,"price_cny":6.5},
+          {"listing_id":"negative-listing-02","market_hash_name":"Sample Skin L (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.204,"price_cny":6.87},
+          {"listing_id":"negative-listing-03","market_hash_name":"Sample Skin M (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.207,"price_cny":7.24},
+          {"listing_id":"negative-listing-04","market_hash_name":"Sample Skin N (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.21,"price_cny":7.61},
+          {"listing_id":"negative-listing-05","market_hash_name":"Sample Skin O (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.213,"price_cny":7.98},
+          {"listing_id":"negative-listing-06","market_hash_name":"Sample Skin P (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.216,"price_cny":8.35},
+          {"listing_id":"negative-listing-07","market_hash_name":"Sample Skin Q (Field-Tested)","collection_id":"sample-beta","collection_name":"Sample Collection Beta","wear":"Field-Tested","float_value":0.219,"price_cny":8.72},
+          {"listing_id":"negative-listing-08","market_hash_name":"Sample Skin R (Field-Tested)","collection_id":"sample-beta","collection_name":"Sample Collection Beta","wear":"Field-Tested","float_value":0.222,"price_cny":9.09},
+          {"listing_id":"negative-listing-09","market_hash_name":"Sample Skin S (Field-Tested)","collection_id":"sample-beta","collection_name":"Sample Collection Beta","wear":"Field-Tested","float_value":0.225,"price_cny":9.46},
+          {"listing_id":"negative-listing-10","market_hash_name":"Sample Skin T (Field-Tested)","collection_id":"sample-beta","collection_name":"Sample Collection Beta","wear":"Field-Tested","float_value":0.228,"price_cny":9.83}
+        ],
+        "runtime_seconds": 0.91,
+        "reason": null
+      },
+      {
+        "structure_id": "sample-structure-5-5",
+        "structure_label": "5 Alpha + 5 Beta",
+        "required_collection_counts": [
+          {"collection_id": "sample-alpha", "display_name": "Sample Collection Alpha", "count": 5},
+          {"collection_id": "sample-beta", "display_name": "Sample Collection Beta", "count": 5}
+        ],
+        "status": "INFEASIBLE",
+        "economics": {"cost_cny": null, "expected_value_cny": null, "expected_profit_cny": null, "roi": null},
+        "basket": null,
+        "runtime_seconds": 0.18,
+        "reason": "No exact basket satisfies this Structure in the retained listing snapshot."
+      },
+      {
+        "structure_id": "sample-structure-10-0",
+        "structure_label": "10 Alpha",
+        "required_collection_counts": [
+          {"collection_id": "sample-alpha", "display_name": "Sample Collection Alpha", "count": 10}
+        ],
+        "status": "OPTIMAL",
+        "economics": {"cost_cny": 48.2, "expected_value_cny": null, "expected_profit_cny": null, "roi": null},
+        "basket": [
+          {"listing_id":"missing-econ-listing-01","market_hash_name":"Sample Skin U (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.19,"price_cny":3.15},
+          {"listing_id":"missing-econ-listing-02","market_hash_name":"Sample Skin V (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.194,"price_cny":3.52},
+          {"listing_id":"missing-econ-listing-03","market_hash_name":"Sample Skin W (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.198,"price_cny":3.89},
+          {"listing_id":"missing-econ-listing-04","market_hash_name":"Sample Skin X (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.202,"price_cny":4.26},
+          {"listing_id":"missing-econ-listing-05","market_hash_name":"Sample Skin Y (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.206,"price_cny":4.63},
+          {"listing_id":"missing-econ-listing-06","market_hash_name":"Sample Skin Z (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.21,"price_cny":5.0},
+          {"listing_id":"missing-econ-listing-07","market_hash_name":"Sample Skin AA (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.214,"price_cny":5.37},
+          {"listing_id":"missing-econ-listing-08","market_hash_name":"Sample Skin AB (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.218,"price_cny":5.74},
+          {"listing_id":"missing-econ-listing-09","market_hash_name":"Sample Skin AC (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.222,"price_cny":6.11},
+          {"listing_id":"missing-econ-listing-10","market_hash_name":"Sample Skin AD (Field-Tested)","collection_id":"sample-alpha","collection_name":"Sample Collection Alpha","wear":"Field-Tested","float_value":0.226,"price_cny":6.48}
+        ],
+        "runtime_seconds": 0.44,
+        "reason": null
+      }
+    ]
+  },
+  "error": null
+}
