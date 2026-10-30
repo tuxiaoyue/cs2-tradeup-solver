@@ -6,6 +6,7 @@ info:
 servers:
   - url: https://api.example.invalid
     description: Placeholder; the hosted endpoint is not public yet.
+security: []
 paths:
   /v1/collections:
     get:
