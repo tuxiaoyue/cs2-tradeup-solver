@@ -1,10 +1,12 @@
 import "./styles.css";
 
-import { SolverApi } from "./api";
+import { PublicApiError, SolverApi } from "./api";
 import { collectionOptions, normalizeSelection } from "./catalog";
+import { JobController } from "./job-controller";
+import { buildSolveRequest } from "./request";
 import { projectServiceStatus } from "./service-status";
 import type { CollectionOption } from "./catalog";
-import type { SolveMode } from "./types";
+import type { JobResponse, SolveMode } from "./types";
 
 const root = document.querySelector<HTMLDivElement>("#app");
 if (!root) {
@@ -12,9 +14,11 @@ if (!root) {
 }
 
 const api = new SolverApi(import.meta.env.VITE_API_BASE_URL ?? "");
+const jobs = new JobController(api);
 let mode: SolveMode = "single";
 let options: CollectionOption[] = [];
 let solveEnabledByService = false;
+let jobActive = false;
 
 root.innerHTML = `
   <header class="app-header">
@@ -69,11 +73,14 @@ const solveButton = requiredButton("solve-button");
 const servicePill = requiredElement("service-pill");
 const serviceBanner = requiredElement("service-banner");
 const selectionMessage = requiredElement("selection-message");
+const jobPanel = requiredElement("job-panel");
+const resultsPanel = requiredElement("results-panel");
 
 modeSingle.addEventListener("click", () => setMode("single"));
 modeDual.addEventListener("click", () => setMode("dual"));
 collectionA.addEventListener("change", refreshSelectionState);
 collectionB.addEventListener("change", refreshSelectionState);
+solveButton.addEventListener("click", () => void submitSolve());
 
 void loadInitialState();
 
@@ -106,7 +113,84 @@ async function loadInitialState(): Promise<void> {
   }
 }
 
+async function submitSolve(): Promise<void> {
+  if (jobActive) return;
+
+  try {
+    const request = buildSolveRequest(mode, collectionA.value, mode === "dual" ? collectionB.value : null);
+    jobActive = true;
+    resultsPanel.hidden = true;
+    jobPanel.hidden = false;
+    jobPanel.innerHTML = `<div class="job-content"><strong>Submitting…</strong><span>Creating an asynchronous solve job.</span></div>`;
+    refreshSelectionState();
+
+    await jobs.start(request, renderJobState);
+  } catch (error) {
+    renderSubmissionError(error);
+  } finally {
+    jobActive = false;
+    refreshSelectionState();
+  }
+}
+
+function renderJobState(job: JobResponse): void {
+  jobPanel.hidden = false;
+
+  if (job.status === "QUEUED") {
+    const queue = job.queue_position == null ? "Waiting for a solver slot" : `Queue position ${job.queue_position}`;
+    jobPanel.innerHTML = jobMarkup("QUEUED", queue, "The request is queued and will start when public compute is available.");
+    return;
+  }
+
+  if (job.status === "RUNNING") {
+    const progress = job.progress
+      ? `${job.progress.structures_completed} / ${job.progress.structures_total} Structures`
+      : "Solving Structures";
+    const elapsed = job.elapsed_seconds == null ? "" : ` · ${job.elapsed_seconds.toFixed(1)}s elapsed`;
+    jobPanel.innerHTML = jobMarkup("RUNNING", `${progress}${elapsed}`, "Each Structure is solved independently using the exact solver path.");
+    return;
+  }
+
+  if (job.status === "FAILED") {
+    jobPanel.innerHTML = jobMarkup("FAILED", "The solve job did not complete.", "No purchase or publication action was taken.", "failed");
+    return;
+  }
+
+  const solved = job.result?.structures.filter((structure) => structure.status === "OPTIMAL").length ?? 0;
+  const total = job.result?.structures.length ?? 0;
+  jobPanel.innerHTML = jobMarkup("COMPLETED", `${solved} solved / ${total} Structures`, "Select a Structure below to inspect its exact basket.", "completed");
+  if (job.result) {
+    resultsPanel.hidden = false;
+    resultsPanel.innerHTML = `<div class="results-placeholder">Result table ready for rendering · ${escapeHtml(job.result.market_snapshot_at)}</div>`;
+  }
+}
+
+function renderSubmissionError(error: unknown): void {
+  jobPanel.hidden = false;
+  let message = "The request could not be submitted.";
+
+  if (error instanceof PublicApiError) {
+    if (error.status === 409) message = "The solver is in its Daily priority / maintenance window.";
+    else if (error.status === 429) message = "The public solve queue is currently full. Try again later.";
+    else if (error.status === 503) message = "Public solving is temporarily unavailable.";
+    else if (error.status === 400) message = "The selected Collection request is not valid.";
+  }
+
+  jobPanel.innerHTML = jobMarkup("NOT SUBMITTED", message, "No solver job was started.", "failed");
+}
+
+function jobMarkup(status: string, primary: string, detail: string, tone = ""): string {
+  return `
+    <div class="job-content ${tone}">
+      <span class="job-status">${escapeHtml(status)}</span>
+      <strong>${escapeHtml(primary)}</strong>
+      <span>${escapeHtml(detail)}</span>
+    </div>
+  `;
+}
+
 function setMode(nextMode: SolveMode): void {
+  if (jobActive) return;
   mode = nextMode;
   const normalized = normalizeSelection(mode, collectionA.value, collectionB.value);
   if (mode === "single") {
@@ -142,8 +226,12 @@ function refreshSelectionState(): void {
     }
   }
 
-  solveButton.disabled = !(solveEnabledByService && selectionValid);
-  selectionMessage.textContent = message;
+  modeSingle.disabled = jobActive;
+  modeDual.disabled = jobActive;
+  collectionA.disabled = jobActive;
+  collectionB.disabled = jobActive;
+  solveButton.disabled = jobActive || !(solveEnabledByService && selectionValid);
+  selectionMessage.textContent = jobActive ? "Solve job in progress." : message;
 }
 
 function requiredElement(id: string): HTMLElement {
