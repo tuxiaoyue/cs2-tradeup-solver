@@ -1,0 +1,8 @@
+{
+  "catalog_version": "sample-2026-10-30",
+  "collections": [
+    {"id": "sample-alpha", "display_name": "Sample Collection Alpha"},
+    {"id": "sample-beta", "display_name": "Sample Collection Beta"},
+    {"id": "sample-gamma", "display_name": "Sample Collection Gamma"}
+  ]
+}
