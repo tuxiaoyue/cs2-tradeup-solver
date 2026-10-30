@@ -3,7 +3,7 @@ import "./styles.css";
 import { PublicApiError, SolverApi } from "./api";
 import { exactBasketDetail } from "./basket-detail";
 import { collectionOptions, normalizeSelection } from "./catalog";
-import { JobController } from "./job-controller";
+import { JobController, JobPollingError } from "./job-controller";
 import { buildSolveRequest } from "./request";
 import { projectStructureRows } from "./results";
 import { projectServiceStatus } from "./service-status";
@@ -130,7 +130,11 @@ async function submitSolve(): Promise<void> {
 
     await jobs.start(request, renderJobState);
   } catch (error) {
-    renderSubmissionError(error);
+    if (error instanceof JobPollingError) {
+      renderPollingError(error);
+    } else {
+      renderSubmissionError(error);
+    }
   } finally {
     jobActive = false;
     refreshSelectionState();
@@ -268,6 +272,22 @@ function renderStructureDetail(structureId: string): void {
     detailPanel.className = "basket-detail integrity-error";
     detailPanel.textContent = "Result integrity check failed: an OPTIMAL basket must contain exactly 10 exact inputs.";
   }
+}
+
+function renderPollingError(error: JobPollingError): void {
+  solveEnabledByService = false;
+  servicePill.textContent = "Job status unavailable";
+  servicePill.dataset.tone = "unavailable";
+  serviceBanner.textContent = "A solve job was accepted, but status polling was interrupted. Refresh before submitting another job.";
+  serviceBanner.dataset.tone = "unavailable";
+  serviceBanner.hidden = false;
+  jobPanel.hidden = false;
+  jobPanel.innerHTML = jobMarkup(
+    "STATUS UNKNOWN",
+    "The solve job was submitted, but its current status could not be refreshed.",
+    `Job ${error.jobId} may still be running. Refresh before submitting another solve.`,
+    "failed"
+  );
 }
 
 function renderSubmissionError(error: unknown): void {
