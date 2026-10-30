@@ -11,6 +11,18 @@ export interface JobApi {
 
 export type JobStateListener = (job: JobResponse) => void;
 
+export class JobPollingError extends Error {
+  readonly jobId: string;
+  readonly cause: unknown;
+
+  constructor(jobId: string, cause: unknown) {
+    super("Job status could not be refreshed");
+    this.name = "JobPollingError";
+    this.jobId = jobId;
+    this.cause = cause;
+  }
+}
+
 export class JobController {
   private readonly api: JobApi;
   private readonly pollIntervalMs: number;
@@ -31,13 +43,21 @@ export class JobController {
 
   async start(request: SolveRequest, onState: JobStateListener): Promise<void> {
     const token = ++this.runToken;
+    this.jobId = null;
+
     const accepted = await this.api.submitSolve(request);
     if (token !== this.runToken) return;
 
     this.jobId = accepted.job_id;
 
     while (token === this.runToken) {
-      const state = await this.api.getJob(accepted.job_id);
+      let state: JobResponse;
+      try {
+        state = await this.api.getJob(accepted.job_id);
+      } catch (cause) {
+        if (token !== this.runToken) return;
+        throw new JobPollingError(accepted.job_id, cause);
+      }
       if (token !== this.runToken) return;
 
       onState(state);
