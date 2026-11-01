@@ -5,8 +5,8 @@
   "started_at": "2026-11-02T00:00:02Z",
   "completed_at": "2026-11-02T00:00:15Z",
   "queue_position": null,
-  "progress": 1,
-  "elapsed_seconds": 13,
+  "progress": null,
+  "elapsed_seconds": null,
   "result": {
     "mode": "dual",
     "collection_a": {

@@ -56,13 +56,15 @@ It will contain public documentation, the API contract, client code, and example
 
 ## Status
 
-Early development. The hosted API is not public yet.
+Public API Contract v1 has completed its initial definition and is undergoing strict specification review. The hosted API is not public yet.
 
 The next milestone is to define the smallest stable public contract for:
 
 `(mode, collection_a, collection_b) -> one exact best basket for every legal Structure`
 
 The public API supports one or two Collections. Each Structure returns one best exact basket; v1 does not apply budget, ROI, or recommendation filtering, and does not support automatic purchasing or recommendations.
+
+The next milestone is Contract Freeze, followed by the Vite web frontend and private service integration.
 
 ## Security
 

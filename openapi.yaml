@@ -18,7 +18,7 @@ paths:
                 $ref: '#/components/schemas/CollectionCatalogResponse'
               examples:
                 default:
-                  $ref: './examples/collections.json'
+                  externalValue: './examples/collections.json'
         '503':
           $ref: '#/components/responses/Unavailable'
   /v1/service-status:
@@ -33,7 +33,7 @@ paths:
                 $ref: '#/components/schemas/ServiceStatusResponse'
               examples:
                 default:
-                  $ref: './examples/service-status.json'
+                  externalValue: './examples/service-status.json'
   /v1/solve:
     post:
       operationId: submitSolve
@@ -81,9 +81,9 @@ paths:
                 $ref: '#/components/schemas/JobResponse'
               examples:
                 running:
-                  $ref: './examples/job-running.json'
+                  externalValue: './examples/job-running.json'
                 completed:
-                  $ref: './examples/job-completed.json'
+                  externalValue: './examples/job-completed.json'
         '404':
           $ref: '#/components/responses/JobNotFound'
 components:
@@ -96,7 +96,7 @@ components:
             $ref: '#/components/schemas/ErrorEnvelope'
           examples:
             default:
-              $ref: './examples/error.json'
+              externalValue: './examples/error.json'
     JobNotFound:
       description: Job does not exist.
       content:
@@ -187,6 +187,7 @@ components:
         - $ref: '#/components/schemas/DualSolveRequest'
       discriminator:
         propertyName: mode
+      description: DUAL collection_a and collection_b IDs must be distinct; this semantic invariant is enforced by the API boundary.
     SingleSolveRequest:
       type: object
       additionalProperties: false
@@ -337,6 +338,7 @@ components:
           type: array
           minItems: 1
           maxItems: 2
+          description: IDs are unique, counts are 1-10, and their sum is exactly 10; IDs must belong to the request Collection scope.
           items:
             $ref: '#/components/schemas/RequiredCollectionCount'
         status:
@@ -349,6 +351,7 @@ components:
           type: [string, 'null']
           maxLength: 500
         basket:
+          description: OPTIMAL requires exactly ten unique listings matching required_collection_counts; all non-OPTIMAL statuses require null.
           oneOf:
             - type: 'null'
             - type: array
@@ -384,6 +387,24 @@ components:
       type: object
       additionalProperties: false
       required: [mode, collection_a, collection_b, market_snapshot_at, solver_version, result_version, structures]
+      description: SINGLE requires collection_b null; DUAL requires a distinct non-null collection_b. Structure counts, basket membership, and listing uniqueness are semantic invariants enforced at the API boundary.
+      allOf:
+        - if:
+            properties:
+              mode:
+                const: single
+          then:
+            properties:
+              collection_b:
+                type: 'null'
+        - if:
+            properties:
+              mode:
+                const: dual
+          then:
+            properties:
+              collection_b:
+                $ref: '#/components/schemas/CollectionRef'
       properties:
         mode:
           enum: [single, dual]
@@ -410,6 +431,53 @@ components:
       type: object
       additionalProperties: false
       required: [job_id, status, submitted_at, started_at, completed_at, queue_position, progress, elapsed_seconds, result, error]
+      description: Lifecycle fields are conditionally constrained by status; progress and elapsed_seconds may be null until implemented by the service.
+      allOf:
+        - if:
+            properties:
+              status:
+                const: QUEUED
+          then:
+            properties:
+              started_at: {type: 'null'}
+              completed_at: {type: 'null'}
+              result: {type: 'null'}
+              error: {type: 'null'}
+              queue_position: {type: integer, minimum: 1}
+        - if:
+            properties:
+              status:
+                const: RUNNING
+          then:
+            properties:
+              started_at: {type: string, format: date-time}
+              completed_at: {type: 'null'}
+              result: {type: 'null'}
+              error: {type: 'null'}
+              queue_position: {type: 'null'}
+        - if:
+            properties:
+              status:
+                const: COMPLETED
+          then:
+            properties:
+              started_at: {type: string, format: date-time}
+              completed_at: {type: string, format: date-time}
+              result:
+                $ref: '#/components/schemas/SolveResult'
+              error: {type: 'null'}
+              queue_position: {type: 'null'}
+        - if:
+            properties:
+              status:
+                const: FAILED
+          then:
+            properties:
+              completed_at: {type: string, format: date-time}
+              result: {type: 'null'}
+              error:
+                $ref: '#/components/schemas/JobFailureObject'
+              queue_position: {type: 'null'}
       properties:
         job_id:
           type: string
@@ -445,7 +513,7 @@ components:
         error:
           oneOf:
             - type: 'null'
-            - $ref: '#/components/schemas/ErrorObject'
+            - $ref: '#/components/schemas/JobFailureObject'
     ErrorObject:
       type: object
       additionalProperties: false
@@ -465,3 +533,15 @@ components:
       properties:
         error:
           $ref: '#/components/schemas/ErrorObject'
+    JobFailureObject:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [SOLVE_FAILED, SOLVE_TIMEOUT]
+        message:
+          type: string
+          minLength: 1
+          maxLength: 500
