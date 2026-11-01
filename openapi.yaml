@@ -1,0 +1,552 @@
+openapi: 3.1.0
+info:
+  title: CS2 Trade-Up Solver Public API
+  version: 1.0.0
+  description: Public asynchronous contract for SINGLE and DUAL exact trade-up solves.
+servers:
+  - url: https://api.example.invalid
+security: []
+paths:
+  /v1/collections:
+    get:
+      operationId: getCollections
+      summary: List available Collections
+      responses:
+        '200':
+          description: Server-maintained Collection catalog.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionCatalogResponse'
+              examples:
+                default:
+                  externalValue: './examples/collections.json'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+  /v1/service-status:
+    get:
+      operationId: getServiceStatus
+      summary: Get public service status
+      responses:
+        '200':
+          description: Coarse public service availability.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceStatusResponse'
+              examples:
+                default:
+                  externalValue: './examples/service-status.json'
+  /v1/solve:
+    post:
+      operationId: submitSolve
+      summary: Submit an asynchronous solve
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolveRequest'
+      responses:
+        '202':
+          description: Solve accepted for asynchronous processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolveAcceptedResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '409':
+          $ref: '#/components/responses/Maintenance'
+        '413':
+          $ref: '#/components/responses/RequestTooLarge'
+        '429':
+          $ref: '#/components/responses/QueueOrRateLimited'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+  /v1/jobs/{job_id}:
+    get:
+      operationId: getJob
+      summary: Get solve job status or result
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 16
+            maxLength: 128
+            pattern: '^[A-Za-z0-9_-]+$'
+      responses:
+        '200':
+          description: Job lifecycle state and completed result when available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResponse'
+              examples:
+                running:
+                  externalValue: './examples/job-running.json'
+                completed:
+                  externalValue: './examples/job-completed.json'
+        '404':
+          $ref: '#/components/responses/JobNotFound'
+components:
+  responses:
+    InvalidRequest:
+      description: Request validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          examples:
+            default:
+              externalValue: './examples/error.json'
+    JobNotFound:
+      description: Job does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Maintenance:
+      description: Service is in maintenance mode.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    RequestTooLarge:
+      description: Request exceeds the public body limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    QueueOrRateLimited:
+      description: Queue capacity or request rate limit was reached.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Unavailable:
+      description: Service is temporarily unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  schemas:
+    Collection:
+      type: object
+      additionalProperties: false
+      required: [id, display_name]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 200
+    CollectionCatalogResponse:
+      type: object
+      additionalProperties: false
+      required: [catalog_version, collections]
+      properties:
+        catalog_version:
+          type: string
+          minLength: 1
+        collections:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: '#/components/schemas/Collection'
+    ServiceStatusResponse:
+      type: object
+      additionalProperties: false
+      required: [availability, accepting_jobs, active_solves, max_active_solves, queue_depth, max_queued_solves, maintenance_message, updated_at]
+      properties:
+        availability:
+          type: string
+          enum: [AVAILABLE, MAINTENANCE, UNAVAILABLE]
+        accepting_jobs:
+          type: boolean
+        active_solves:
+          type: integer
+          minimum: 0
+        max_active_solves:
+          type: integer
+          minimum: 1
+        queue_depth:
+          type: integer
+          minimum: 0
+        max_queued_solves:
+          type: integer
+          minimum: 0
+        maintenance_message:
+          type: [string, 'null']
+        updated_at:
+          type: string
+          format: date-time
+    SolveRequest:
+      oneOf:
+        - $ref: '#/components/schemas/SingleSolveRequest'
+        - $ref: '#/components/schemas/DualSolveRequest'
+      discriminator:
+        propertyName: mode
+      description: DUAL collection_a and collection_b IDs must be distinct; this semantic invariant is enforced by the API boundary.
+    SingleSolveRequest:
+      type: object
+      additionalProperties: false
+      required: [mode, collection_a, collection_b]
+      properties:
+        mode:
+          const: single
+        collection_a:
+          type: string
+          minLength: 1
+          maxLength: 128
+        collection_b:
+          type: 'null'
+    DualSolveRequest:
+      type: object
+      additionalProperties: false
+      required: [mode, collection_a, collection_b]
+      properties:
+        mode:
+          const: dual
+        collection_a:
+          type: string
+          minLength: 1
+          maxLength: 128
+        collection_b:
+          type: string
+          minLength: 1
+          maxLength: 128
+          not:
+            const: ''
+    SolveAcceptedResponse:
+      type: object
+      additionalProperties: false
+      required: [job_id, status, submitted_at, queue_position]
+      properties:
+        job_id:
+          type: string
+          minLength: 16
+          maxLength: 128
+          pattern: '^[A-Za-z0-9_-]+$'
+        status:
+          const: QUEUED
+        submitted_at:
+          type: string
+          format: date-time
+        queue_position:
+          type: [integer, 'null']
+          minimum: 1
+    CollectionRef:
+      type: object
+      additionalProperties: false
+      required: [id, display_name]
+      properties:
+        id:
+          type: string
+          minLength: 1
+        display_name:
+          type: string
+          minLength: 1
+    RequiredCollectionCount:
+      type: object
+      additionalProperties: false
+      required: [collection_id, display_name, count]
+      properties:
+        collection_id:
+          type: string
+          minLength: 1
+        display_name:
+          type: string
+          minLength: 1
+        count:
+          type: integer
+          minimum: 1
+          maximum: 10
+    Listing:
+      type: object
+      additionalProperties: false
+      required: [listing_id, market_hash_name, collection_id, collection_name, wear, float_value, price_cny]
+      properties:
+        listing_id:
+          type: string
+          minLength: 1
+        market_hash_name:
+          type: string
+          minLength: 1
+        collection_id:
+          type: string
+          minLength: 1
+        collection_name:
+          type: string
+          minLength: 1
+        wear:
+          type: string
+          minLength: 1
+        float_value:
+          type: number
+          minimum: 0
+          maximum: 1
+        price_cny:
+          type: number
+          exclusiveMinimum: 0
+    Economics:
+      oneOf:
+        - $ref: '#/components/schemas/NumericEconomics'
+        - $ref: '#/components/schemas/UnavailableEconomics'
+    NumericEconomics:
+      type: object
+      additionalProperties: false
+      required: [cost_cny, expected_value_cny, expected_profit_cny, roi]
+      properties:
+        cost_cny:
+          type: number
+        expected_value_cny:
+          type: number
+        expected_profit_cny:
+          type: number
+        roi:
+          type: number
+    UnavailableEconomics:
+      type: object
+      additionalProperties: false
+      required: [cost_cny, expected_value_cny, expected_profit_cny, roi]
+      properties:
+        cost_cny:
+          type: 'null'
+        expected_value_cny:
+          type: 'null'
+        expected_profit_cny:
+          type: 'null'
+        roi:
+          type: 'null'
+    Structure:
+      oneOf:
+        - $ref: '#/components/schemas/OptimalStructure'
+        - $ref: '#/components/schemas/NonOptimalStructure'
+    StructureBase:
+      type: object
+      additionalProperties: false
+      required: [structure_id, structure_label, required_collection_counts, status, runtime_seconds, reason, basket, economics]
+      properties:
+        structure_id:
+          type: string
+          minLength: 1
+        structure_label:
+          type: string
+          minLength: 1
+        required_collection_counts:
+          type: array
+          minItems: 1
+          maxItems: 2
+          description: IDs are unique, counts are 1-10, and their sum is exactly 10; IDs must belong to the request Collection scope.
+          items:
+            $ref: '#/components/schemas/RequiredCollectionCount'
+        status:
+          type: string
+          enum: [OPTIMAL, INFEASIBLE, TIMEOUT, ERROR]
+        runtime_seconds:
+          type: [number, 'null']
+          minimum: 0
+        reason:
+          type: [string, 'null']
+          maxLength: 500
+        basket:
+          description: OPTIMAL requires exactly ten unique listings matching required_collection_counts; all non-OPTIMAL statuses require null.
+          oneOf:
+            - type: 'null'
+            - type: array
+              minItems: 10
+              maxItems: 10
+              items:
+                $ref: '#/components/schemas/Listing'
+        economics:
+          $ref: '#/components/schemas/Economics'
+    OptimalStructure:
+      allOf:
+        - $ref: '#/components/schemas/StructureBase'
+        - type: object
+          properties:
+            status:
+              const: OPTIMAL
+            basket:
+              type: array
+              minItems: 10
+              maxItems: 10
+              items:
+                $ref: '#/components/schemas/Listing'
+    NonOptimalStructure:
+      allOf:
+        - $ref: '#/components/schemas/StructureBase'
+        - type: object
+          properties:
+            status:
+              enum: [INFEASIBLE, TIMEOUT, ERROR]
+            basket:
+              type: 'null'
+    SolveResult:
+      type: object
+      additionalProperties: false
+      required: [mode, collection_a, collection_b, market_snapshot_at, solver_version, result_version, structures]
+      description: SINGLE requires collection_b null; DUAL requires a distinct non-null collection_b. Structure counts, basket membership, and listing uniqueness are semantic invariants enforced at the API boundary.
+      allOf:
+        - if:
+            properties:
+              mode:
+                const: single
+          then:
+            properties:
+              collection_b:
+                type: 'null'
+        - if:
+            properties:
+              mode:
+                const: dual
+          then:
+            properties:
+              collection_b:
+                $ref: '#/components/schemas/CollectionRef'
+      properties:
+        mode:
+          enum: [single, dual]
+        collection_a:
+          $ref: '#/components/schemas/CollectionRef'
+        collection_b:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/CollectionRef'
+        market_snapshot_at:
+          type: string
+          format: date-time
+        solver_version:
+          type: string
+          minLength: 1
+        result_version:
+          type: string
+          minLength: 1
+        structures:
+          type: array
+          items:
+            $ref: '#/components/schemas/Structure'
+    JobResponse:
+      type: object
+      additionalProperties: false
+      required: [job_id, status, submitted_at, started_at, completed_at, queue_position, progress, elapsed_seconds, result, error]
+      description: Lifecycle fields are conditionally constrained by status; progress and elapsed_seconds may be null until implemented by the service.
+      allOf:
+        - if:
+            properties:
+              status:
+                const: QUEUED
+          then:
+            properties:
+              started_at: {type: 'null'}
+              completed_at: {type: 'null'}
+              result: {type: 'null'}
+              error: {type: 'null'}
+              queue_position: {type: integer, minimum: 1}
+        - if:
+            properties:
+              status:
+                const: RUNNING
+          then:
+            properties:
+              started_at: {type: string, format: date-time}
+              completed_at: {type: 'null'}
+              result: {type: 'null'}
+              error: {type: 'null'}
+              queue_position: {type: 'null'}
+        - if:
+            properties:
+              status:
+                const: COMPLETED
+          then:
+            properties:
+              started_at: {type: string, format: date-time}
+              completed_at: {type: string, format: date-time}
+              result:
+                $ref: '#/components/schemas/SolveResult'
+              error: {type: 'null'}
+              queue_position: {type: 'null'}
+        - if:
+            properties:
+              status:
+                const: FAILED
+          then:
+            properties:
+              completed_at: {type: string, format: date-time}
+              result: {type: 'null'}
+              error:
+                $ref: '#/components/schemas/JobFailureObject'
+              queue_position: {type: 'null'}
+      properties:
+        job_id:
+          type: string
+          minLength: 16
+          maxLength: 128
+          pattern: '^[A-Za-z0-9_-]+$'
+        status:
+          type: string
+          enum: [QUEUED, RUNNING, COMPLETED, FAILED]
+        submitted_at:
+          type: string
+          format: date-time
+        started_at:
+          type: [string, 'null']
+          format: date-time
+        completed_at:
+          type: [string, 'null']
+          format: date-time
+        queue_position:
+          type: [integer, 'null']
+          minimum: 1
+        progress:
+          type: [number, 'null']
+          minimum: 0
+          maximum: 1
+        elapsed_seconds:
+          type: [number, 'null']
+          minimum: 0
+        result:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/SolveResult'
+        error:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/JobFailureObject'
+    ErrorObject:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [INVALID_REQUEST, JOB_NOT_FOUND, MAINTENANCE, QUEUE_FULL, RATE_LIMITED, REQUEST_TOO_LARGE, UNAVAILABLE]
+        message:
+          type: string
+          minLength: 1
+          maxLength: 500
+    ErrorEnvelope:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorObject'
+    JobFailureObject:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [SOLVE_FAILED, SOLVE_TIMEOUT]
+        message:
+          type: string
+          minLength: 1
+          maxLength: 500

@@ -1,0 +1,7 @@
+{
+  "catalog_version": "catalog-demo-v1",
+  "collections": [
+    {"id": "demo-alpha", "display_name": "Demo Alpha"},
+    {"id": "demo-beta", "display_name": "Demo Beta"}
+  ]
+}
