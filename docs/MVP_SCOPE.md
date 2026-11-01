@@ -2,14 +2,14 @@
 
 ## Product contract
 
-The public MVP accepts exactly two CS2 Collections and returns one exact best basket for every legal Structure generated from that Collection pair.
+The public MVP accepts one or two CS2 Collections and returns one exact best basket for every legal Structure generated from the selected Collection or Collection pair.
 
 The hosted v1 path is C5-only. Market-source expansion is deliberately out of scope for the first release.
 
 ## Locked behavior
 
-- Exactly two Collections per request.
-- Enumerate all legal Structures for the pair.
+- One Collection for SINGLE requests, or two distinct Collections for DUAL requests.
+- Enumerate all legal Structures for the selected Collection scope.
 - Reuse the existing exact solver objective and solving path.
 - Return one best result per Structure.
 - Preserve infeasible / timeout / error states instead of hiding them.
