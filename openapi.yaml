@@ -5,10 +5,12 @@ info:
   description: Public asynchronous contract for SINGLE and DUAL exact trade-up solves.
 servers:
   - url: https://api.example.invalid
+security: []
 paths:
   /v1/collections:
     get:
       operationId: getCollections
+      summary: List available Collections
       responses:
         '200':
           description: Server-maintained Collection catalog.
@@ -24,6 +26,7 @@ paths:
   /v1/service-status:
     get:
       operationId: getServiceStatus
+      summary: Get public service status
       responses:
         '200':
           description: Coarse public service availability.
@@ -37,6 +40,7 @@ paths:
   /v1/solve:
     post:
       operationId: submitSolve
+      summary: Submit an asynchronous solve
       requestBody:
         required: true
         content:
@@ -63,6 +67,7 @@ paths:
   /v1/jobs/{job_id}:
     get:
       operationId: getJob
+      summary: Get solve job status or result
       parameters:
         - name: job_id
           in: path

@@ -2,9 +2,22 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
+from jsonschema import Draft202012Validator, RefResolver
 
 
 ROOT = Path(__file__).parents[1]
+
+
+def _schema(name):
+    document = yaml.safe_load((ROOT / "openapi.yaml").read_text(encoding="utf-8"))
+    return document, document["components"]["schemas"][name]
+
+
+def _validate_example(filename, schema_name):
+    document, schema = _schema(schema_name)
+    validator = Draft202012Validator({"$ref": f"#/components/schemas/{schema_name}"}, resolver=RefResolver.from_schema(document))
+    validator.validate(json.loads((ROOT / "examples" / filename).read_text(encoding="utf-8-sig")))
 
 
 def _request_valid(value):
@@ -22,7 +35,13 @@ def _structure_valid(value):
     if not 1 <= len(counts) <= 2 or len({x["collection_id"] for x in counts}) != len(counts) or sum(x["count"] for x in counts) != 10:
         return False
     if value["status"] == "OPTIMAL":
-        return isinstance(value["basket"], list) and len(value["basket"]) == 10 and len({x["listing_id"] for x in value["basket"]}) == 10
+        if not isinstance(value["basket"], list) or len(value["basket"]) != 10 or len({x["listing_id"] for x in value["basket"]}) != 10:
+            return False
+        expected = {x["collection_id"]: x["count"] for x in counts}
+        actual = {}
+        for item in value["basket"]:
+            actual[item["collection_id"]] = actual.get(item["collection_id"], 0) + 1
+        return actual == expected
     return value["status"] in {"INFEASIBLE", "TIMEOUT", "ERROR"} and value["basket"] is None
 
 
@@ -34,6 +53,18 @@ def test_public_paths_and_external_examples_are_exact():
     assert "/internal/" not in text
     for name in ("collections", "service-status", "job-running", "job-completed", "error", "job-failed"):
         assert (ROOT / "examples" / f"{name}.json").is_file()
+
+
+@pytest.mark.parametrize("filename,schema", [
+    ("collections.json", "CollectionCatalogResponse"),
+    ("service-status.json", "ServiceStatusResponse"),
+    ("job-running.json", "JobResponse"),
+    ("job-completed.json", "JobResponse"),
+    ("job-failed.json", "JobResponse"),
+    ("error.json", "ErrorEnvelope"),
+])
+def test_examples_validate_against_openapi_schemas(filename, schema):
+    _validate_example(filename, schema)
 
 
 def test_request_invariants():
@@ -55,6 +86,36 @@ def test_result_and_economics_invariants():
     for structure in structures:
         values = list(structure["economics"].values())
         assert all(isinstance(v, (int, float)) for v in values) or all(v is None for v in values)
+
+
+@pytest.mark.parametrize("invalid", [
+    {"mode": "dual", "collection_a": "a", "collection_b": "a"},
+    {"mode": "single", "collection_a": "a", "collection_b": "b"},
+    {"mode": "dual", "collection_a": "a", "collection_b": None},
+    {"mode": "single", "collection_a": "a", "collection_b": None, "extra": True},
+])
+def test_invalid_request_semantics_rejected(invalid):
+    assert not _request_valid(invalid)
+
+
+def test_invalid_structure_semantics_rejected():
+    data = json.loads((ROOT / "examples/job-completed.json").read_text(encoding="utf-8-sig"))
+    structure = data["result"]["structures"][0]
+    bad_sum = json.loads(json.dumps(structure)); bad_sum["required_collection_counts"][0]["count"] = 9
+    bad_basket = json.loads(json.dumps(structure)); bad_basket["basket"][0]["collection_id"] = "outside"
+    bad_nonoptimal = json.loads(json.dumps(data["result"]["structures"][1])); bad_nonoptimal["basket"] = []
+    assert not _structure_valid(bad_sum)
+    assert not _structure_valid(bad_basket)
+    assert not _structure_valid(bad_nonoptimal)
+
+
+def test_invalid_economics_and_completed_lifecycle_rejected():
+    data = json.loads((ROOT / "examples/job-completed.json").read_text(encoding="utf-8-sig"))
+    economics = data["result"]["structures"][0]["economics"]
+    economics["roi"] = None
+    assert not (all(v is None for v in economics.values()) or all(isinstance(v, (int, float)) for v in economics.values()))
+    completed = json.loads(json.dumps(data)); completed["result"] = None
+    assert not (completed["status"] == "COMPLETED" and completed["result"])
 
 
 @pytest.mark.parametrize("name,status", [("job-running", "RUNNING"), ("job-completed", "COMPLETED"), ("job-failed", "FAILED")])
