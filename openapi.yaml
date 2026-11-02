@@ -89,6 +89,8 @@ paths:
                   externalValue: './examples/job-running.json'
                 completed:
                   externalValue: './examples/job-completed.json'
+                failed:
+                  externalValue: './examples/job-failed.json'
         '404':
           $ref: '#/components/responses/JobNotFound'
 components:
@@ -448,7 +450,7 @@ components:
               completed_at: {type: 'null'}
               result: {type: 'null'}
               error: {type: 'null'}
-              queue_position: {type: integer, minimum: 1}
+              queue_position: {type: [integer, 'null'], minimum: 1}
         - if:
             properties:
               status:
