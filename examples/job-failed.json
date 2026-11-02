@@ -1,0 +1,12 @@
+{
+  "job_id": "job_demo_failed_01",
+  "status": "FAILED",
+  "submitted_at": "2026-11-02T00:00:00Z",
+  "started_at": null,
+  "completed_at": "2026-11-02T00:00:03Z",
+  "queue_position": null,
+  "progress": null,
+  "elapsed_seconds": null,
+  "result": null,
+  "error": {"code": "SOLVE_FAILED", "message": "The solve could not be completed."}
+}

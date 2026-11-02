@@ -1,3 +1,9 @@
+# Node / web
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
 # Python
 __pycache__/
 *.py[cod]
@@ -6,7 +12,6 @@ __pycache__/
 .ruff_cache/
 .venv/
 venv/
-dist/
 build/
 *.egg-info/
 
@@ -20,6 +25,11 @@ build/
 *.pfx
 secrets/
 credentials/
+
+# Databases / production snapshots
+*.db
+*.sqlite
+*.sqlite3
 
 # Editors / OS
 .vscode/
