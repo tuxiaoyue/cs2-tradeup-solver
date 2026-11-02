@@ -1,0 +1,10 @@
+{
+  "availability": "AVAILABLE",
+  "accepting_jobs": true,
+  "active_solves": 0,
+  "max_active_solves": 1,
+  "queue_depth": 0,
+  "max_queued_solves": 20,
+  "maintenance_message": null,
+  "updated_at": "2026-11-02T00:00:00Z"
+}

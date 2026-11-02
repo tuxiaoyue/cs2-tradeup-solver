@@ -78,12 +78,7 @@ describe("result projection", () => {
 
   it("keeps unavailable economics as null instead of zero", () => {
     const [row] = projectStructureRows(result([
-      structure({ economics: {
-        cost_cny: 44,
-        expected_value_cny: null,
-        expected_profit_cny: null,
-        roi: null
-      } })
+      structure({ economics: null })
     ]));
 
     expect(row.expectedValueCny).toBeNull();

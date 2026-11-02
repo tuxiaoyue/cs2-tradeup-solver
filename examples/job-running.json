@@ -1,12 +1,12 @@
 {
-  "job_id": "job_sample_01HZZZZZZZZZZZZZZZZZZZZZ",
+  "job_id": "job_demo_running_01",
   "status": "RUNNING",
-  "submitted_at": "2026-10-30T11:00:00Z",
-  "started_at": "2026-10-30T11:00:03Z",
+  "submitted_at": "2026-11-02T00:00:00Z",
+  "started_at": "2026-11-02T00:00:02Z",
   "completed_at": null,
   "queue_position": null,
-  "progress": {"structures_completed": 327, "structures_total": 607},
-  "elapsed_seconds": 31.4,
+  "progress": null,
+  "elapsed_seconds": null,
   "result": null,
   "error": null
 }

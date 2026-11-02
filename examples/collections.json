@@ -1,8 +1,7 @@
 {
-  "catalog_version": "sample-2026-10-30",
+  "catalog_version": "catalog-demo-v1",
   "collections": [
-    {"id": "sample-alpha", "display_name": "Sample Collection Alpha"},
-    {"id": "sample-beta", "display_name": "Sample Collection Beta"},
-    {"id": "sample-gamma", "display_name": "Sample Collection Gamma"}
+    {"id": "demo-alpha", "display_name": "Demo Alpha"},
+    {"id": "demo-beta", "display_name": "Demo Beta"}
   ]
 }

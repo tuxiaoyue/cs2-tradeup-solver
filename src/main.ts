@@ -89,13 +89,7 @@ void loadInitialState();
 
 async function loadInitialState(): Promise<void> {
   try {
-    const [catalog, service] = await Promise.all([
-      api.getCollections(),
-      api.getServiceStatus()
-    ]);
-    options = collectionOptions(catalog.collections);
-    renderCollectionOptions();
-
+    const service = await api.getServiceStatus();
     const serviceView = projectServiceStatus(service);
     solveEnabledByService = serviceView.solveEnabled;
     servicePill.textContent = serviceView.message;
@@ -103,12 +97,16 @@ async function loadInitialState(): Promise<void> {
     serviceBanner.textContent = serviceView.message;
     serviceBanner.dataset.tone = serviceView.tone;
     serviceBanner.hidden = serviceView.tone === "ready";
+
+    const catalog = await api.getCollections();
+    options = collectionOptions(catalog.collections);
+    renderCollectionOptions();
     refreshSelectionState();
   } catch {
     solveEnabledByService = false;
-    servicePill.textContent = "API unavailable";
+    servicePill.textContent = "Public solving is temporarily unavailable";
     servicePill.dataset.tone = "unavailable";
-    serviceBanner.textContent = "The public solver API is not connected yet.";
+    serviceBanner.textContent = "Collection catalog unavailable.";
     serviceBanner.dataset.tone = "unavailable";
     serviceBanner.hidden = false;
     selectionMessage.textContent = "Collection catalog unavailable.";
@@ -151,16 +149,17 @@ function renderJobState(job: JobResponse): void {
   }
 
   if (job.status === "RUNNING") {
-    const progress = job.progress
-      ? `${job.progress.structures_completed} / ${job.progress.structures_total} Structures`
-      : "Solving Structures";
+    const progress = job.progress == null ? "Solving Structures" : `${(job.progress * 100).toFixed(0)}% complete`;
     const elapsed = job.elapsed_seconds == null ? "" : ` · ${job.elapsed_seconds.toFixed(1)}s elapsed`;
     jobPanel.innerHTML = jobMarkup("RUNNING", `${progress}${elapsed}`, "Each Structure is solved independently using the exact solver path.");
     return;
   }
 
   if (job.status === "FAILED") {
-    jobPanel.innerHTML = jobMarkup("FAILED", "The solve job did not complete.", "No purchase or publication action was taken.", "failed");
+    const message = job.error?.code === "SOLVE_TIMEOUT"
+      ? "The solve timed out."
+      : "The solve job did not complete.";
+    jobPanel.innerHTML = jobMarkup("FAILED", message, "No purchase or publication action was taken.", "failed");
     return;
   }
 
@@ -247,10 +246,10 @@ function renderStructureDetail(structureId: string): void {
           <span>10 exact C5 listings · ${detail.runtimeSeconds == null ? "runtime unavailable" : `${detail.runtimeSeconds.toFixed(3)}s solver runtime`}</span>
         </div>
         <div class="detail-economics">
-          <span>Cost <strong>${formatCny(detail.economics.cost_cny)}</strong></span>
-          <span>EV <strong>${formatCny(detail.economics.expected_value_cny)}</strong></span>
-          <span>Profit <strong class="${signClass(detail.economics.expected_profit_cny)}">${formatCny(detail.economics.expected_profit_cny)}</strong></span>
-          <span>ROI <strong class="${signClass(detail.economics.roi)}">${formatRoi(detail.economics.roi)}</strong></span>
+          <span>Cost <strong>${formatCny(detail.economics?.cost_cny ?? null)}</strong></span>
+          <span>EV <strong>${formatCny(detail.economics?.expected_value_cny ?? null)}</strong></span>
+          <span>Profit <strong class="${signClass(detail.economics?.expected_profit_cny ?? null)}">${formatCny(detail.economics?.expected_profit_cny ?? null)}</strong></span>
+          <span>ROI <strong class="${signClass(detail.economics?.roi ?? null)}">${formatRoi(detail.economics?.roi ?? null)}</strong></span>
         </div>
       </div>
       <div class="basket-table">
@@ -296,7 +295,8 @@ function renderSubmissionError(error: unknown): void {
 
   if (error instanceof PublicApiError) {
     if (error.status === 409) message = "The solver is in its Daily priority / maintenance window.";
-    else if (error.status === 429) message = "The public solve queue is currently full. Try again later.";
+    else if (error.status === 429 && error.code === "RATE_LIMITED") message = "Too many solve requests. Try again later.";
+    else if (error.status === 429 && error.code === "QUEUE_FULL") message = "The public solve queue is currently full. Try again later.";
     else if (error.status === 503) message = "Public solving is temporarily unavailable.";
     else if (error.status === 400) message = "The selected Collection request is not valid.";
   }

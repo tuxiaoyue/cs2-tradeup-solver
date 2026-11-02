@@ -11,6 +11,7 @@ describe("service status projection", () => {
       max_active_solves: 1,
       queue_depth: 0,
       max_queued_solves: 20,
+      maintenance_message: null,
       updated_at: "2026-10-30T12:00:00Z"
     }).solveEnabled).toBe(true);
   });
@@ -39,6 +40,7 @@ describe("service status projection", () => {
       max_active_solves: 1,
       queue_depth: 0,
       max_queued_solves: 20,
+      maintenance_message: null,
       updated_at: "2026-10-30T12:00:00Z"
     }).solveEnabled).toBe(false);
   });

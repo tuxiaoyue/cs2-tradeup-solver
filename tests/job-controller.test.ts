@@ -18,7 +18,7 @@ function job(status: JobResponse["status"], overrides: Partial<JobResponse> = {}
     started_at: status === "QUEUED" ? null : "2026-10-30T12:00:01Z",
     completed_at: status === "COMPLETED" || status === "FAILED" ? "2026-10-30T12:00:05Z" : null,
     queue_position: status === "QUEUED" ? 2 : null,
-    progress: status === "RUNNING" ? { structures_completed: 12, structures_total: 100 } : null,
+    progress: status === "RUNNING" ? 0.12 : null,
     elapsed_seconds: status === "RUNNING" ? 4 : null,
     result: null,
     error: status === "FAILED" ? { code: "SOLVE_FAILED", message: "Solve failed" } : null,
@@ -62,7 +62,7 @@ describe("JobController", () => {
     await controller.start(request, (state) => states.push(state));
 
     expect(states[0].queue_position).toBe(2);
-    expect(states[1].progress).toEqual({ structures_completed: 12, structures_total: 100 });
+    expect(states[1].progress).toBe(0.12);
   });
 
   it("stops polling after completed", async () => {

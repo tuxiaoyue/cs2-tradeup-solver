@@ -17,7 +17,7 @@ export interface ServiceStatusResponse {
   max_active_solves: number;
   queue_depth: number;
   max_queued_solves: number;
-  maintenance_message?: string | null;
+  maintenance_message: string | null;
   updated_at: string;
 }
 
@@ -31,15 +31,10 @@ export interface SolveAcceptedResponse {
   job_id: string;
   status: "QUEUED";
   submitted_at: string;
-  queue_position?: number | null;
+  queue_position: number | null;
 }
 
 export type JobState = "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED";
-
-export interface JobProgress {
-  structures_completed: number;
-  structures_total: number;
-}
 
 export interface CollectionCount {
   collection_id: string;
@@ -57,12 +52,14 @@ export interface BasketInput {
   price_cny: number;
 }
 
-export interface Economics {
-  cost_cny: number | null;
-  expected_value_cny: number | null;
-  expected_profit_cny: number | null;
-  roi: number | null;
+export interface NumericEconomics {
+  cost_cny: number;
+  expected_value_cny: number;
+  expected_profit_cny: number;
+  roi: number;
 }
+
+export type Economics = NumericEconomics | null;
 
 export type StructureStatus = "OPTIMAL" | "INFEASIBLE" | "TIMEOUT" | "ERROR";
 
@@ -73,8 +70,8 @@ export interface StructureResult {
   status: StructureStatus;
   economics: Economics;
   basket: BasketInput[] | null;
-  runtime_seconds?: number | null;
-  reason?: string | null;
+  runtime_seconds: number | null;
+  reason: string | null;
 }
 
 export interface SolveResult {
@@ -88,7 +85,7 @@ export interface SolveResult {
 }
 
 export interface PublicJobError {
-  code: "SOLVE_FAILED" | "SOLVE_TIMEOUT" | "SERVICE_RESTARTED";
+  code: "SOLVE_FAILED" | "SOLVE_TIMEOUT";
   message: string;
 }
 
@@ -99,7 +96,7 @@ export interface JobResponse {
   started_at: string | null;
   completed_at: string | null;
   queue_position: number | null;
-  progress: JobProgress | null;
+  progress: number | null;
   elapsed_seconds: number | null;
   result: SolveResult | null;
   error: PublicJobError | null;
