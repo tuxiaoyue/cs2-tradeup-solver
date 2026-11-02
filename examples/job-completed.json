@@ -1,0 +1,389 @@
+{
+  "job_id": "job_demo_completed_01",
+  "status": "COMPLETED",
+  "submitted_at": "2026-11-02T00:00:00Z",
+  "started_at": "2026-11-02T00:00:02Z",
+  "completed_at": "2026-11-02T00:00:15Z",
+  "queue_position": null,
+  "progress": null,
+  "elapsed_seconds": null,
+  "result": {
+    "mode": "dual",
+    "collection_a": {
+      "id": "demo-alpha",
+      "display_name": "Demo Alpha"
+    },
+    "collection_b": {
+      "id": "demo-beta",
+      "display_name": "Demo Beta"
+    },
+    "market_snapshot_at": "2026-11-02T00:00:10Z",
+    "solver_version": "demo-solver-1",
+    "result_version": "public-result-1",
+    "structures": [
+      {
+        "structure_id": "structure-positive",
+        "structure_label": "10 Demo Alpha",
+        "required_collection_counts": [
+          {
+            "collection_id": "demo-alpha",
+            "display_name": "Demo Alpha",
+            "count": 10
+          }
+        ],
+        "status": "OPTIMAL",
+        "runtime_seconds": 1.2,
+        "reason": null,
+        "basket": [
+          {
+            "listing_id": "listing-positive-01",
+            "market_hash_name": "Demo Alpha Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.01,
+            "price_cny": 1.0
+          },
+          {
+            "listing_id": "listing-positive-02",
+            "market_hash_name": "Demo Alpha Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.02,
+            "price_cny": 1.0
+          },
+          {
+            "listing_id": "listing-positive-03",
+            "market_hash_name": "Demo Alpha Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.03,
+            "price_cny": 1.0
+          },
+          {
+            "listing_id": "listing-positive-04",
+            "market_hash_name": "Demo Alpha Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.04,
+            "price_cny": 1.0
+          },
+          {
+            "listing_id": "listing-positive-05",
+            "market_hash_name": "Demo Alpha Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.05,
+            "price_cny": 1.0
+          },
+          {
+            "listing_id": "listing-positive-06",
+            "market_hash_name": "Demo Alpha Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.06,
+            "price_cny": 1.0
+          },
+          {
+            "listing_id": "listing-positive-07",
+            "market_hash_name": "Demo Alpha Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.07,
+            "price_cny": 1.0
+          },
+          {
+            "listing_id": "listing-positive-08",
+            "market_hash_name": "Demo Alpha Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.08,
+            "price_cny": 1.0
+          },
+          {
+            "listing_id": "listing-positive-09",
+            "market_hash_name": "Demo Alpha Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.09,
+            "price_cny": 1.0
+          },
+          {
+            "listing_id": "listing-positive-10",
+            "market_hash_name": "Demo Alpha Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.1,
+            "price_cny": 1.0
+          }
+        ],
+        "economics": {
+          "cost_cny": 10.0,
+          "expected_value_cny": 15.0,
+          "expected_profit_cny": 5.0,
+          "roi": 0.5
+        }
+      },
+      {
+        "structure_id": "structure-infeasible",
+        "structure_label": "5 Demo Alpha + 5 Demo Beta",
+        "required_collection_counts": [
+          {
+            "collection_id": "demo-alpha",
+            "display_name": "Demo Alpha",
+            "count": 5
+          },
+          {
+            "collection_id": "demo-beta",
+            "display_name": "Demo Beta",
+            "count": 5
+          }
+        ],
+        "status": "INFEASIBLE",
+        "runtime_seconds": 0.2,
+        "reason": "No feasible exact basket was found.",
+        "basket": null,
+        "economics": {
+          "cost_cny": null,
+          "expected_value_cny": null,
+          "expected_profit_cny": null,
+          "roi": null
+        }
+      },
+      {
+        "structure_id": "structure-negative",
+        "structure_label": "10 Demo Beta",
+        "required_collection_counts": [
+          {
+            "collection_id": "demo-beta",
+            "display_name": "Demo Beta",
+            "count": 10
+          }
+        ],
+        "status": "OPTIMAL",
+        "runtime_seconds": 1.4,
+        "reason": null,
+        "basket": [
+          {
+            "listing_id": "listing-structure-negative-01",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-beta",
+            "collection_name": "Demo Beta",
+            "wear": "FN",
+            "float_value": 0.01,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-negative-02",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-beta",
+            "collection_name": "Demo Beta",
+            "wear": "FN",
+            "float_value": 0.02,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-negative-03",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-beta",
+            "collection_name": "Demo Beta",
+            "wear": "FN",
+            "float_value": 0.03,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-negative-04",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-beta",
+            "collection_name": "Demo Beta",
+            "wear": "FN",
+            "float_value": 0.04,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-negative-05",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-beta",
+            "collection_name": "Demo Beta",
+            "wear": "FN",
+            "float_value": 0.05,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-negative-06",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-beta",
+            "collection_name": "Demo Beta",
+            "wear": "FN",
+            "float_value": 0.06,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-negative-07",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-beta",
+            "collection_name": "Demo Beta",
+            "wear": "FN",
+            "float_value": 0.07,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-negative-08",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-beta",
+            "collection_name": "Demo Beta",
+            "wear": "FN",
+            "float_value": 0.08,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-negative-09",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-beta",
+            "collection_name": "Demo Beta",
+            "wear": "FN",
+            "float_value": 0.09,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-negative-10",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-beta",
+            "collection_name": "Demo Beta",
+            "wear": "FN",
+            "float_value": 0.1,
+            "price_cny": 2.0
+          }
+        ],
+        "economics": {
+          "cost_cny": 20.0,
+          "expected_value_cny": 12.0,
+          "expected_profit_cny": -8.0,
+          "roi": -0.4
+        }
+      },
+      {
+        "structure_id": "structure-unavailable",
+        "structure_label": "10 Demo Alpha",
+        "required_collection_counts": [
+          {
+            "collection_id": "demo-alpha",
+            "display_name": "Demo Alpha",
+            "count": 10
+          }
+        ],
+        "status": "OPTIMAL",
+        "runtime_seconds": 1.6,
+        "reason": "Output valuation unavailable.",
+        "basket": [
+          {
+            "listing_id": "listing-structure-unavailable-01",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.01,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-unavailable-02",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.02,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-unavailable-03",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.03,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-unavailable-04",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.04,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-unavailable-05",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.05,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-unavailable-06",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.06,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-unavailable-07",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.07,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-unavailable-08",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.08,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-unavailable-09",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.09,
+            "price_cny": 2.0
+          },
+          {
+            "listing_id": "listing-structure-unavailable-10",
+            "market_hash_name": "Demo Item",
+            "collection_id": "demo-alpha",
+            "collection_name": "Demo Alpha",
+            "wear": "FN",
+            "float_value": 0.1,
+            "price_cny": 2.0
+          }
+        ],
+        "economics": {
+          "cost_cny": null,
+          "expected_value_cny": null,
+          "expected_profit_cny": null,
+          "roi": null
+        }
+      }
+    ]
+  },
+  "error": null
+}
